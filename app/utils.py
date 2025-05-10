@@ -24,50 +24,50 @@ def decrypt_password(encrypted_password):
 
 def evaluate_password_strength(password):
     """
-    Évalue la robustesse d'un mot de passe et retourne un score de 0 à 100
-    et des suggestions d'amélioration.
+    Evaluates password strength and returns a score from 0 to 100
+    and improvement suggestions.
     """
     score = 0
     suggestions = []
 
-    # Longueur
+    # Length
     if len(password) < 8:
-        suggestions.append("Le mot de passe devrait faire au moins 8 caractères")
+        suggestions.append("Password should be at least 8 characters long")
     else:
-        score += min(len(password) * 4, 40)  # Max 40 points pour la longueur
+        score += min(len(password) * 4, 40)  # Max 40 points for length
 
-    # Complexité
+    # Complexity
     if re.search(r'[A-Z]', password):
         score += 15
     else:
-        suggestions.append("Ajoutez des lettres majuscules")
+        suggestions.append("Add uppercase letters")
     
     if re.search(r'[a-z]', password):
         score += 15
     else:
-        suggestions.append("Ajoutez des lettres minuscules")
+        suggestions.append("Add lowercase letters")
     
     if re.search(r'[0-9]', password):
         score += 15
     else:
-        suggestions.append("Ajoutez des chiffres")
+        suggestions.append("Add numbers")
     
     if re.search(r'[^A-Za-z0-9]', password):
         score += 15
     else:
-        suggestions.append("Ajoutez des caractères spéciaux")
+        suggestions.append("Add special characters")
 
-    # Évaluation finale
+    # Final evaluation
     if score < 40:
-        strength = "Très faible"
+        strength = "Very Weak"
     elif score < 60:
-        strength = "Faible"
+        strength = "Weak"
     elif score < 80:
-        strength = "Moyen"
+        strength = "Medium"
     elif score < 90:
-        strength = "Fort"
+        strength = "Strong"
     else:
-        strength = "Très fort"
+        strength = "Very Strong"
 
     return {
         'score': score,

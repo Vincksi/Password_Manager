@@ -41,28 +41,52 @@ def add_password():
 @bp.route('/generate_password', methods=['POST'])
 @login_required
 def generate_password():
-    form = PasswordGeneratorForm()
-    if form.validate_on_submit():
-        try:
-            password = generate_secure_password(
-                length=form.length.data,
-                include_uppercase=form.include_uppercase.data,
-                include_lowercase=form.include_lowercase.data,
-                include_numbers=form.include_numbers.data,
-                include_special=form.include_special.data
-            )
-            return jsonify({'password': password})
-        except ValueError as e:
-            return jsonify({'error': str(e)}), 400
-    return jsonify({'error': 'Invalid form data'}), 400
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Extract parameters with defaults
+        length = int(data.get('length', 16))
+        include_uppercase = data.get('include_uppercase', True)
+        include_lowercase = data.get('include_lowercase', True)
+        include_numbers = data.get('include_numbers', True)
+        include_special = data.get('include_special', True)
+
+        # Validate length
+        if length < 8 or length > 64:
+            return jsonify({'error': 'Password length must be between 8 and 64 characters'}), 400
+
+        # Generate password
+        password = generate_secure_password(
+            length=length,
+            include_uppercase=include_uppercase,
+            include_lowercase=include_lowercase,
+            include_numbers=include_numbers,
+            include_special=include_special
+        )
+        return jsonify({'password': password})
+    except Exception as e:
+        current_app.logger.error(f'Error generating password: {str(e)}')
+        return jsonify({'error': 'Error generating password'}), 500
 
 @bp.route('/evaluate_password', methods=['POST'])
 @login_required
 def evaluate_password():
-    password = request.json.get('password')
-    if not password:
-        return jsonify({'error': 'No password provided'}), 400
-    return jsonify(evaluate_password_strength(password))
+    try:
+        data = request.get_json()
+        if not data or 'password' not in data:
+            return jsonify({'error': 'No password provided'}), 400
+        
+        password = data['password']
+        if not isinstance(password, str):
+            return jsonify({'error': 'Invalid password format'}), 400
+            
+        result = evaluate_password_strength(password)
+        return jsonify(result)
+    except Exception as e:
+        current_app.logger.error(f'Error evaluating password: {str(e)}')
+        return jsonify({'error': 'Error evaluating password strength'}), 500
 
 @bp.route('/view_password/<int:id>')
 @login_required
